@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Full-screen splash before React/PWA shell loads */
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: #121212;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+#splash img {
+  width: min(200px, 52vw);
+  height: auto;
+  border-radius: 1rem;
+  border: 1px solid rgba(212, 166, 75, 0.35);
+  box-shadow: 0 16px 48px rgba(212, 166, 75, 0.12);
+  object-fit: cover;
+}
+#splash .splash-wordmark {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d4a64b;
+  letter-spacing: 0.02em;
+}
+#splash .splash-tagline {
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+#splash.splash--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #d4a64b, #f5c84c);
+}
+
+.card {
+  @apply bg-surface rounded-2xl p-4 border border-white/5;
+}

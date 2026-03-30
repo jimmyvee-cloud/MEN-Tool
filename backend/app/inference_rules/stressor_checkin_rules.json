@@ -1,0 +1,71 @@
+{
+  "module": "stressor_checkin",
+  "module_weight": 1.0,
+  "description": "Rules correlating stressor patterns with check-in mood data",
+  "rules": [
+    {
+      "id": "high_stress_low_mood",
+      "weight": 0.9,
+      "conditions": [
+        { "metric": "stressor_avg_intensity", "op": ">=", "value": 7 },
+        { "metric": "avg_mood", "op": "<=", "value": 4 }
+      ],
+      "match": "all",
+      "severity": "warning",
+      "title": "High stress, low mood",
+      "message": "Your stressors have been intense this week and your mood reflects it. Consider prioritizing a relief activity.",
+      "tags": ["stress", "mood"]
+    },
+    {
+      "id": "stress_spike",
+      "weight": 0.8,
+      "conditions": [
+        { "metric": "stressor_count", "op": ">=", "value": 10 },
+        { "metric": "stressor_to_checkin_ratio", "op": ">=", "value": 2 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "Stressor spike",
+      "message": "You're logging far more stressors than check-ins — don't forget to pause and check in with yourself.",
+      "tags": ["stress", "balance"]
+    },
+    {
+      "id": "chronic_category",
+      "weight": 0.7,
+      "conditions": [
+        { "metric": "stressor_top_category_count", "op": ">", "value": 5 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "One area keeps coming up",
+      "message": "One area of your life is generating most of your stress this week. Might be worth a closer look.",
+      "tags": ["stress", "pattern"]
+    },
+    {
+      "id": "high_stress_stable_mood",
+      "weight": 0.5,
+      "conditions": [
+        { "metric": "stressor_avg_intensity", "op": ">=", "value": 6 },
+        { "metric": "avg_mood", "op": ">=", "value": 6 }
+      ],
+      "match": "all",
+      "severity": "info",
+      "title": "Resilience showing",
+      "message": "Despite heavy stressors, your mood is holding steady. That's resilience.",
+      "tags": ["stress", "mood", "positive"]
+    },
+    {
+      "id": "low_stress_low_mood",
+      "weight": 0.6,
+      "conditions": [
+        { "metric": "stressor_count", "op": "<=", "value": 2 },
+        { "metric": "avg_mood", "op": "<=", "value": 4 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "Mood is low, but stress isn't the cause",
+      "message": "Your stress is low but mood is down — sometimes the cause isn't external. Check in with yourself.",
+      "tags": ["mood", "introspection"]
+    }
+  ]
+}

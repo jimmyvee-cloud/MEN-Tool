@@ -1,0 +1,71 @@
+{
+  "module": "relief_checkin",
+  "module_weight": 0.9,
+  "description": "Rules correlating relief activity with check-in mood data",
+  "rules": [
+    {
+      "id": "relief_boosts_mood",
+      "weight": 0.8,
+      "conditions": [
+        { "metric": "relief_avg_effectiveness", "op": ">=", "value": 7 },
+        { "metric": "mood_trend", "op": ">", "value": 0 }
+      ],
+      "match": "all",
+      "severity": "info",
+      "title": "Relief is working",
+      "message": "Your relief methods are effective and mood is trending up. Keep doing what works.",
+      "tags": ["relief", "mood", "positive"]
+    },
+    {
+      "id": "low_relief_low_mood",
+      "weight": 0.9,
+      "conditions": [
+        { "metric": "relief_count", "op": "<=", "value": 1 },
+        { "metric": "avg_mood", "op": "<=", "value": 4 }
+      ],
+      "match": "all",
+      "severity": "warning",
+      "title": "Low relief, low mood",
+      "message": "You've barely logged any relief this week and mood is low. Try one of your go-to methods.",
+      "tags": ["relief", "mood"]
+    },
+    {
+      "id": "unfocused_relief",
+      "weight": 0.6,
+      "conditions": [
+        { "metric": "relief_avg_focus", "op": "<=", "value": 3 },
+        { "metric": "relief_count", "op": ">=", "value": 3 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "Relief without focus",
+      "message": "You're doing relief activities but not fully engaged. Quality over quantity — try being more present.",
+      "tags": ["relief", "focus"]
+    },
+    {
+      "id": "high_relief_no_improvement",
+      "weight": 0.7,
+      "conditions": [
+        { "metric": "relief_count", "op": ">=", "value": 7 },
+        { "metric": "mood_trend", "op": "<=", "value": 0 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "Effort without lift",
+      "message": "You're putting in the effort but mood isn't lifting. It might be time to try something different.",
+      "tags": ["relief", "mood"]
+    },
+    {
+      "id": "relief_outpaces_stress",
+      "weight": 0.4,
+      "conditions": [
+        { "metric": "relief_to_stressor_ratio", "op": ">=", "value": 3 }
+      ],
+      "match": "all",
+      "severity": "info",
+      "title": "Strong relief-to-stress ratio",
+      "message": "Great ratio of relief to stress this week. Keep it up.",
+      "tags": ["relief", "balance", "positive"]
+    }
+  ]
+}

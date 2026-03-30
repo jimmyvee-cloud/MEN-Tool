@@ -1,0 +1,69 @@
+{
+  "module": "activity",
+  "module_weight": 0.6,
+  "description": "Rules based on logging frequency and consistency as a proxy for user wellbeing",
+  "rules": [
+    {
+      "id": "ghost_mode",
+      "weight": 0.9,
+      "conditions": [
+        { "metric": "silent_days", "op": ">=", "value": 5 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "You've been quiet",
+      "message": "You've been quiet this week. Even a 10-second check-in helps build the picture.",
+      "tags": ["activity", "silence"]
+    },
+    {
+      "id": "logging_drop",
+      "weight": 0.7,
+      "conditions": [
+        { "metric": "total_logs", "op": "<=", "value": 2 },
+        { "metric": "window_days", "op": "==", "value": 7 }
+      ],
+      "match": "all",
+      "severity": "nudge",
+      "title": "Low activity this week",
+      "message": "Only a couple of logs this week. Consistency helps us give you better insights.",
+      "tags": ["activity", "consistency"]
+    },
+    {
+      "id": "hyper_logging",
+      "weight": 0.5,
+      "conditions": [
+        { "metric": "logs_per_day", "op": ">=", "value": 8 }
+      ],
+      "match": "all",
+      "severity": "info",
+      "title": "High logging volume",
+      "message": "You're logging a lot. That's great for data — make sure it's not becoming a source of stress itself.",
+      "tags": ["activity", "volume"]
+    },
+    {
+      "id": "no_checkins",
+      "weight": 0.8,
+      "conditions": [
+        { "metric": "checkin_count", "op": "==", "value": 0 }
+      ],
+      "match": "all",
+      "severity": "warning",
+      "title": "No mood check-ins",
+      "message": "No mood check-ins this week. Without them, we can't connect the dots between stress, relief, and how you feel.",
+      "tags": ["activity", "checkin"]
+    },
+    {
+      "id": "steady_rhythm",
+      "weight": 0.3,
+      "conditions": [
+        { "metric": "active_days", "op": ">=", "value": 6 },
+        { "metric": "checkin_count", "op": ">=", "value": 5 }
+      ],
+      "match": "all",
+      "severity": "info",
+      "title": "Solid consistency",
+      "message": "Solid consistency this week. Your data is painting a clear picture.",
+      "tags": ["activity", "positive"]
+    }
+  ]
+}
