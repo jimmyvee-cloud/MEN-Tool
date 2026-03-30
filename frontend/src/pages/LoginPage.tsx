@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiJson, setTokens } from "@/lib/api";
+import { apiJson, formatApiError, setTokens } from "@/lib/api";
 import { AuthBranding } from "@/components/AuthBranding";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
 export function LoginPage() {
   const nav = useNavigate();
@@ -24,8 +25,8 @@ export function LoginPage() {
       });
       setTokens(data.access_token, data.refresh_token);
       nav("/", { replace: true });
-    } catch {
-      setErr("Invalid login");
+    } catch (ex) {
+      setErr(formatApiError(ex));
     }
   }
 
@@ -54,6 +55,7 @@ export function LoginPage() {
           Login
         </button>
       </form>
+      <GoogleSignInButton />
       <Link to="/register" className="mt-6 text-gold text-sm">
         Create account
       </Link>

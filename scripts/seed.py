@@ -38,6 +38,47 @@ def _iso() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
+def promote_admin_emails() -> None:
+    """Set tier=admin (and ensure active) for listed emails if a profile already exists.
+
+    Comma-separated list in SEED_PROMOTE_ADMIN_EMAILS only — no built-in default (safe for production).
+    Each email must already have a user row (register in-app or Google first). Missing users are skipped quietly.
+    """
+    from boto3.dynamodb.conditions import Key
+
+    from app.keys import gsi1_pk_email, pk_user, sk_user_profile
+
+    raw = (os.environ.get("SEED_PROMOTE_ADMIN_EMAILS") or "").strip()
+    if not raw:
+        return
+    emails = [e.strip().lower() for e in raw.split(",") if e.strip()]
+    if not emails:
+        return
+    t = _table()
+    now = _iso()
+    for email in emails:
+        r = t.query(
+            IndexName="gsi_email",
+            KeyConditionExpression=Key("gsi1_pk").eq(gsi1_pk_email(TENANT_ID, email))
+            & Key("gsi1_sk").begins_with("USER#"),
+            Limit=1,
+        )
+        items = r.get("Items", [])
+        if not items:
+            print(f"promote_admin: skip (no user yet): {email}")
+            continue
+        u = items[0]
+        uid = u.get("user_id")
+        if not uid:
+            continue
+        t.update_item(
+            Key={"pk": pk_user(TENANT_ID, uid), "sk": sk_user_profile()},
+            UpdateExpression="SET tier = :a, is_active = :act, updated_at = :u",
+            ExpressionAttributeValues={":a": "admin", ":act": True, ":u": now},
+        )
+        print(f"promote_admin: tier=admin for {email} (user_id={uid})")
+
+
 def main():
     t = _table()
     now = _iso()
@@ -147,6 +188,11 @@ def main():
     t.put_item(Item=u)
     print(f"Seeded admin {admin_email} / {admin_pass} user_id={uid} invite={invite}")
 
+    promote_admin_emails()
+
 
 if __name__ == "__main__":
-    main()
+    if "--promote-only" in sys.argv:
+        promote_admin_emails()
+    else:
+        main()

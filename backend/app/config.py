@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # Plaintext dev API key must match tenant row (we store bcrypt hash in DB; dev seed stores dev key hash)
     mentool_dev_api_key: str = "dev-tenant-api-key-change-me"
 
+    # Web client ID from Google Cloud (OAuth 2.0). Empty disables POST /auth/google.
+    google_oauth_client_id: str = ""
+
     jwt_secret_ssm_path: str | None = None
 
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Brain, Calendar, ChevronLeft, Leaf, Trophy, Users, Zap } from "lucide-react";
+import { Calendar, ChevronLeft, Trophy, Users } from "lucide-react";
+import { ActivityCountsGrid, type ActivityCounts } from "@/components/ActivityCountsGrid";
 import { apiJson } from "@/lib/api";
 import { FOLLOWING_UPDATED_EVENT } from "@/lib/socialEvents";
 import { AchievementGrid, type BadgeCatalogEntry } from "@/components/AchievementGrid";
@@ -26,8 +27,6 @@ type Me = {
   badge_catalog?: BadgeCatalogEntry[];
 };
 
-type Counts = { checkins: number; stressors: number; reliefs: number };
-
 type FollowingRow = {
   user_id: string;
   display_name: string;
@@ -37,7 +36,7 @@ type FollowingRow = {
 export function ProfilePage() {
   const { refresh: refreshHeader } = useUserHeader();
   const [me, setMe] = useState<Me | null>(null);
-  const [counts, setCounts] = useState<Counts | null>(null);
+  const [counts, setCounts] = useState<ActivityCounts | null>(null);
   const [following, setFollowing] = useState<FollowingRow[]>([]);
 
   const loadFollowing = () => {
@@ -48,7 +47,7 @@ export function ProfilePage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([apiJson<Me>("/v1/me"), apiJson<Counts>("/v1/me/counts")])
+    Promise.all([apiJson<Me>("/v1/me"), apiJson<ActivityCounts>("/v1/me/counts")])
       .then(([m, c]) => {
         if (!cancelled) {
           setMe(m);
@@ -101,25 +100,7 @@ export function ProfilePage() {
             </p>
           </div>
 
-          {counts && (
-            <div className="grid grid-cols-3 gap-2">
-              <div className="card text-center py-3">
-                <Brain className="w-6 h-6 mx-auto text-blue-400 mb-1" />
-                <div className="text-lg font-bold">{counts.checkins}</div>
-                <div className="text-[10px] text-muted uppercase">Check-ins</div>
-              </div>
-              <div className="card text-center py-3">
-                <Zap className="w-6 h-6 mx-auto text-gold mb-1" />
-                <div className="text-lg font-bold">{counts.stressors}</div>
-                <div className="text-[10px] text-muted uppercase">Stressors</div>
-              </div>
-              <div className="card text-center py-3">
-                <Leaf className="w-6 h-6 mx-auto text-emerald-400 mb-1" />
-                <div className="text-lg font-bold">{counts.reliefs}</div>
-                <div className="text-[10px] text-muted uppercase">Reliefs</div>
-              </div>
-            </div>
-          )}
+          <ActivityCountsGrid counts={counts} scopeLabel="All time" loading={!counts} />
 
           <RankCard
             title={me.rank.rank_title}

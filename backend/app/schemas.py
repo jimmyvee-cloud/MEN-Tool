@@ -26,6 +26,11 @@ class RefreshBody(BaseModel):
     refresh_token: str
 
 
+class GoogleAuthBody(BaseModel):
+    id_token: str = Field(min_length=10)
+    invite_code: str | None = None
+
+
 class CheckInCreate(BaseModel):
     mood_score: int = Field(ge=0, le=10)
     note: str | None = None
@@ -72,6 +77,12 @@ class ProfilePatch(BaseModel):
 
 class WallPostCreate(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
+
+
+class AdminPasswordResetBody(BaseModel):
+    """Set a user’s password (admin only)."""
+
+    new_password: str = Field(min_length=8, max_length=200)
 
 
 class AdminUserPatch(BaseModel):

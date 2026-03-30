@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.deps import AuthUser, require_admin
 from app.repositories import users as users_repo
-from app.schemas import AdminUserPatch
+from app.schemas import AdminPasswordResetBody, AdminUserPatch
+from app.security import hash_password
 from app.util import dynamo_to_json
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -53,6 +54,23 @@ def referrals(admin: AuthUser = Depends(require_admin)):
                 }
             )
     return {"referrals": edges}
+
+
+@router.post("/users/{user_id}/reset-password")
+def admin_reset_password(
+    user_id: str, body: AdminPasswordResetBody, admin: AuthUser = Depends(require_admin)
+):
+    u = users_repo.get_user(admin.tenant_id, user_id)
+    if not u:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    pw_hash = hash_password(body.new_password)
+    users_repo.update_user_fields(
+        admin.tenant_id,
+        user_id,
+        {"password_hash": pw_hash, "updated_at": now},
+    )
+    return {"ok": True}
 
 
 @router.patch("/users/{user_id}")

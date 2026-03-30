@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Crown, RefreshCw, Share2, Shield, UserCheck, UserX } from "lucide-react";
+import {
+  ChevronLeft,
+  Crown,
+  KeyRound,
+  RefreshCw,
+  Share2,
+  Shield,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import { apiFetch, apiJson } from "@/lib/api";
 import { DashboardHeader } from "@/components/DashboardHeader";
 
@@ -162,6 +171,14 @@ export function AdminPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={loading || !active}
+                      className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-gold/40 text-gold hover:bg-gold/10 disabled:opacity-50"
+                      onClick={() => void resetPassword(u.user_id, u.email)}
+                    >
+                      <KeyRound className="w-3.5 h-3.5" /> Reset password
+                    </button>
                     {active ? (
                       <button
                         type="button"

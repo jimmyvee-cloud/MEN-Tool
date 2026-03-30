@@ -14,6 +14,7 @@ services:
     env_file:
       - .env
     environment:
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
       DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
       AWS_ACCESS_KEY_ID: local
       AWS_SECRET_ACCESS_KEY: local
@@ -23,7 +24,9 @@ services:
     volumes:
       - ./backend/app:/app/app
       - ./scripts:/app/scripts
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "python -m scripts.ensure_dev_db
+      && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend-dev:
     image: node:22-bookworm-slim
@@ -34,8 +37,9 @@ services:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
     environment:
-      # Origin only — frontend paths already include /v1/...
-      VITE_API_BASE_URL: http://localhost:8001
+      # Dev server proxies /v1 → API (browser never calls :8001 directly).
+      VITE_PROXY_API_TARGET: http://api:8000
+      VITE_GOOGLE_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - api

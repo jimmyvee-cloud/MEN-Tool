@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { apiJson, setTokens } from "@/lib/api";
 import { AuthBranding } from "@/components/AuthBranding";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
 export function RegisterPage() {
   const nav = useNavigate();
@@ -11,6 +12,8 @@ export function RegisterPage() {
   const [name, setName] = useState("");
   const [invite, setInvite] = useState(params.get("invite") || "");
   const [err, setErr] = useState("");
+  const inviteRef = useRef(invite);
+  inviteRef.current = invite;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -74,6 +77,7 @@ export function RegisterPage() {
           Register
         </button>
       </form>
+      <GoogleSignInButton inviteCodeRef={inviteRef} />
       <Link to="/login" className="mt-6 text-gold text-sm">
         Back to login
       </Link>

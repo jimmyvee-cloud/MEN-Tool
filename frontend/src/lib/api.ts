@@ -2,8 +2,15 @@ import { enqueueOutbox, flushOutbox, outboxCount } from "./offlineQueue";
 
 /** API origin (no trailing /v1). Paths passed to apiFetch always start with /v1. */
 export function getApiOrigin() {
-  const raw = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
-  return raw.replace(/\/v1$/i, "");
+  let raw = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+  let base = raw.replace(/\/v1$/i, "");
+  if (
+    import.meta.env.DEV &&
+    /^https?:\/\/(localhost|127\.0\.0\.1):8001$/i.test(base)
+  ) {
+    return "";
+  }
+  return base;
 }
 
 const getBase = getApiOrigin;
@@ -68,6 +75,39 @@ export async function apiFetch(path: string, init: Opt = {}) {
     }
   }
   return res;
+}
+
+/** True when fetch failed before an HTTP response (offline, wrong host, CORS, etc.). */
+export function isLikelyNetworkError(ex: unknown): boolean {
+  if (ex instanceof TypeError) return true;
+  if (ex instanceof DOMException && ex.name === "NetworkError") return true;
+  if (ex instanceof Error) {
+    const m = ex.message || "";
+    return (
+      /networkerror|failed to fetch|load failed|fetch.*aborted/i.test(m) ||
+      ex.name === "NetworkError"
+    );
+  }
+  return false;
+}
+
+/** Human-readable message from apiJson thrown Error (FastAPI `detail` or raw body). */
+export function formatApiError(ex: unknown): string {
+  if (!(ex instanceof Error)) return "Something went wrong";
+  const raw = ex.message.trim();
+  if (!raw) return "Something went wrong";
+  try {
+    const j = JSON.parse(raw) as { detail?: unknown };
+    const d = j.detail;
+    if (typeof d === "string") return d;
+    if (Array.isArray(d) && d.length > 0) {
+      const first = d[0] as { msg?: string };
+      if (typeof first?.msg === "string") return first.msg;
+    }
+  } catch {
+    /* not JSON */
+  }
+  return raw;
 }
 
 export async function apiJson<T>(path: string, init: Opt = {}): Promise<T> {

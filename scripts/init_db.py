@@ -81,6 +81,9 @@ def main():
             },
         ],
     )
+    c.get_waiter("table_exists").wait(
+        TableName=TABLE_NAME, WaiterConfig={"Delay": 1, "MaxAttempts": 30}
+    )
     print(f"Created table {TABLE_NAME}")
 
 

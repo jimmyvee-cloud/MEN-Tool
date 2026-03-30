@@ -95,6 +95,8 @@ def update_user_fields(tenant_id: str, user_id: str, updates: dict[str, Any]) ->
     for k, v in updates.items():
         if k in ("pk", "sk"):
             continue
+        if k == "xp_total" and isinstance(v, float):
+            v = _xp_for_dynamo(v)
         nk = f"#f{i}"
         vk = f":v{i}"
         names[nk] = k
@@ -122,6 +124,13 @@ def _xp_float(v: Any) -> float:
     return float(v)
 
 
+def _xp_for_dynamo(xp: float | int | Decimal) -> Decimal:
+    """DynamoDB / boto3 reject Python float; store XP as Decimal."""
+    if isinstance(xp, Decimal):
+        return xp.quantize(Decimal("0.01"))
+    return Decimal(str(round(float(xp), 2)))
+
+
 def increment_xp(tenant_id: str, user_id: str, delta: int | float) -> dict | None:
     u = get_user(tenant_id, user_id)
     if not u:
@@ -132,7 +141,7 @@ def increment_xp(tenant_id: str, user_id: str, delta: int | float) -> dict | Non
         tenant_id,
         user_id,
         {
-            "xp_total": xp,
+            "xp_total": _xp_for_dynamo(xp),
             "rank_level": ri.rank_level,
             "rank_title": ri.rank_title,
             "updated_at": _iso_now(),
@@ -178,12 +187,13 @@ def build_user_item(
     invited_by: str | None,
     tier: str = "free",
     avatar_url: str | None = None,
+    google_sub: str | None = None,
 ) -> dict[str, Any]:
     now = _iso_now()
-    xp = 0.0
-    ri = rank_from_xp(xp)
+    xp = _xp_for_dynamo(0)
+    ri = rank_from_xp(float(xp))
     email_l = email.lower().strip()
-    return {
+    item: dict[str, Any] = {
         "pk": pk_user(tenant_id, user_id),
         "sk": sk_user_profile(),
         "entity_type": "USER",
@@ -220,3 +230,6 @@ def build_user_item(
         "gsi3_pk": gsi3_pk_tenant_users(tenant_id),
         "gsi3_sk": gsi3_sk_user_created(now, user_id),
     }
+    if google_sub:
+        item["google_sub"] = google_sub
+    return item

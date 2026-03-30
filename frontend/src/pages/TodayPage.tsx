@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { BarChart2, Brain, Camera, Gift, Globe, MessageCircle, UserPlus } from "lucide-react";
+import { ActivityCountsGrid } from "@/components/ActivityCountsGrid";
 import { apiJson } from "@/lib/api";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useUserHeader } from "@/context/UserHeaderContext";
@@ -205,9 +206,24 @@ export function TodayPage() {
   const moodRounded = moodAvg != null ? Math.round(moodAvg) : null;
   const checkinWord = todayCheckins.length === 1 ? "check-in" : "check-ins";
 
+  const todayCounts = useMemo(
+    () => ({
+      checkins: todayCheckins.length,
+      stressors: todayStressors.length,
+      reliefs: todayReliefs.length,
+    }),
+    [todayCheckins, todayStressors, todayReliefs],
+  );
+
   return (
     <div className="max-w-lg mx-auto px-4 pt-6 space-y-4">
       <DashboardHeader />
+
+      <ActivityCountsGrid
+        counts={logsReady ? todayCounts : null}
+        scopeLabel="Today"
+        loading={!logsReady}
+      />
 
       <section className="card space-y-3">
         <div className="flex justify-between text-[10px] uppercase tracking-widest text-muted">
