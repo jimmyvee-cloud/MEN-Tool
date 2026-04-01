@@ -1,0 +1,29 @@
+{
+  "id": "/",
+  "name": "MEN-Tool",
+  "short_name": "MEN-Tool",
+  "description": "Men's personal performance and mental health tracking.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "theme_color": "#c9a227",
+  "background_color": "#ffffff",
+  "categories": ["health", "lifestyle", "wellness"],
+  "icons": [
+    {
+      "src": "/mentool-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mentool-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

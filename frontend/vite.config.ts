@@ -73,25 +73,8 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         devOptions: { enabled: false },
         registerType: "autoUpdate",
-        includeAssets: ["mentool-logo.png", "favicon.svg"],
-        manifest: {
-          name: "MEN-Tool",
-          short_name: "MEN-Tool",
-          description: "Men's personal performance tracking",
-          theme_color: "#c9a227",
-          background_color: "#121212",
-          display: "standalone",
-          start_url: "/",
-          icons: [
-            {
-              src: "mentool-logo.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            { src: "mentool-logo.png", sizes: "192x192", type: "image/png", purpose: "any" },
-          ],
-        },
+        includeAssets: ["mentool-logo.png", "favicon.svg", "manifest.webmanifest"],
+        manifest: false,
         workbox: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
           // Do not route API through the service worker — breaks auth and confuses offline handling.
