@@ -177,6 +177,7 @@ def main():
         "setup_bonus_follow": False,
         "setup_bonus_wall": False,
         "setup_bonus_avatar": False,
+        "setup_dismissed": False,
         "membership_days_credited": 0,
         "gsi1_pk": gsi1_pk_email(TENANT_ID, admin_email),
         "gsi1_sk": f"USER#{uid}",

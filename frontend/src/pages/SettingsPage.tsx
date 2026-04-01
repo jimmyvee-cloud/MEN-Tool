@@ -15,6 +15,7 @@ type Me = {
     avatar_url?: string;
     tier?: string;
     timezone?: string;
+    setup_dismissed?: boolean;
   };
 };
 
@@ -44,7 +45,12 @@ export function SettingsPage() {
     };
   }, []);
 
-  async function saveProfile(partial: { display_name?: string; timezone?: string; avatar_url?: string }) {
+  async function saveProfile(partial: {
+    display_name?: string;
+    timezone?: string;
+    avatar_url?: string;
+    setup_dismissed?: boolean;
+  }) {
     setErr(null);
     setSaving(true);
     try {
@@ -190,6 +196,22 @@ export function SettingsPage() {
               {timezone ? ` Currently: ${timezoneLabel(timezone)}.` : ""}
             </p>
           </div>
+
+          {me.user.setup_dismissed ? (
+            <div className="card space-y-3 border-white/10">
+              <p className="text-sm text-muted">
+                The profile setup checklist is hidden on your Today page.
+              </p>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => void saveProfile({ setup_dismissed: false })}
+                className="w-full py-2.5 rounded-xl border border-gold/35 text-gold text-sm font-medium hover:bg-gold/10 transition-colors disabled:opacity-50"
+              >
+                Show setup checklist on Today again
+              </button>
+            </div>
+          ) : null}
 
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-wide text-muted">Subscription</label>

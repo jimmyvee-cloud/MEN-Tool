@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiPostQueued } from "@/lib/api";
+import { apiPostQueued, formatApiError } from "@/lib/api";
 import { usePending } from "@/App";
 import { useBadgeUnlock } from "@/context/BadgeUnlockContext";
 import { badgesUnlockedFromResponse } from "@/lib/badgeUnlockPayload";
@@ -23,10 +23,12 @@ export function StressorPage() {
   const [title, setTitle] = useState("");
   const [intensity, setIntensity] = useState(5);
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
   async function submit() {
     if (!title.trim()) return;
     setBusy(true);
+    setErr("");
     try {
       const res = await apiPostQueued<Record<string, unknown>>(
         "/v1/stressors",
@@ -38,6 +40,8 @@ export function StressorPage() {
         if (buds.length) announceUnlocks(buds);
       }
       nav("/");
+    } catch (ex) {
+      setErr(formatApiError(ex));
     } finally {
       setBusy(false);
     }
@@ -91,6 +95,7 @@ export function StressorPage() {
             className="w-full"
           />
         </div>
+        {err ? <p className="text-red-400 text-sm">{err}</p> : null}
         <button
           type="button"
           disabled={busy}

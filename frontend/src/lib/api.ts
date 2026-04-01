@@ -6,7 +6,7 @@ export function getApiOrigin() {
   let base = raw.replace(/\/v1$/i, "");
   if (
     import.meta.env.DEV &&
-    /^https?:\/\/(localhost|127\.0\.0\.1):8001$/i.test(base)
+    /^https?:\/\/(localhost|127\.0\.0\.1):8818$/i.test(base)
   ) {
     return "";
   }
@@ -124,26 +124,20 @@ export async function apiPostQueued<T>(
   body: unknown,
   setPending?: (n: number) => void
 ): Promise<T | void> {
-  const headers: Record<string, string> = {
-    "X-API-Key": getKey(),
-    "X-Tenant-Id": getTenant(),
-    "Content-Type": "application/json",
-  };
   const { access } = getStoredTokens();
-  if (access) headers["Authorization"] = `Bearer ${access}`;
-  const url = `${getBase()}${path}`;
   try {
-    const res = await fetch(url, {
+    const res = await apiFetch(path, {
       method: "POST",
-      headers,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     if (res.ok) {
       if (setPending) setPending(await outboxCount());
       return (await res.json()) as T;
     }
-    throw new Error(await res.text());
-  } catch {
+    const t = await res.text();
+    throw new Error(t || res.statusText);
+  } catch (e) {
     if (!navigator.onLine) {
       await enqueueOutbox("POST", path, body, {
         "X-API-Key": getKey(),
@@ -153,6 +147,7 @@ export async function apiPostQueued<T>(
       if (setPending) setPending(await outboxCount());
       return;
     }
+    if (e instanceof Error) throw e;
     throw new Error("Network error");
   }
 }

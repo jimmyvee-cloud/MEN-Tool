@@ -73,6 +73,7 @@ class ProfilePatch(BaseModel):
     avatar_url: str | None = None
     timezone: str | None = Field(default=None, max_length=80)
     profile_steps_completed: int | None = Field(default=None, ge=0, le=5)
+    setup_dismissed: bool | None = None
 
 
 class WallPostCreate(BaseModel):

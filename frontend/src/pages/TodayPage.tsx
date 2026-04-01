@@ -18,8 +18,11 @@ type Me = {
     user_id: string;
     timezone?: string;
     profile_steps_completed?: number;
+    /** When true, Today page hides the setup checklist (server-persisted). */
+    setup_dismissed?: boolean;
   };
   setup?: {
+    dismissed?: boolean;
     tasks: SetupTask[];
     completed: number;
     total: number;
@@ -148,6 +151,8 @@ export function TodayPage() {
   const [stressors, setStressors] = useState<StressorRow[]>([]);
   const [reliefs, setReliefs] = useState<ReliefRow[]>([]);
   const [logsReady, setLogsReady] = useState(false);
+  const [dismissBusy, setDismissBusy] = useState(false);
+  const [dismissErr, setDismissErr] = useState("");
 
   useEffect(() => {
     let ok = true;
@@ -177,10 +182,30 @@ export function TodayPage() {
   }, []);
 
   const myId = me?.user.user_id ?? headerMe?.user_id ?? "";
+  const setupDismissed =
+    me?.user?.setup_dismissed === true || me?.setup?.dismissed === true;
   const tasks = me?.setup?.tasks ?? [];
   const completed = me?.setup?.completed ?? 0;
-  const total = me?.setup?.total ?? Math.max(tasks.length, 1);
+  const total = Math.max(me?.setup?.total ?? 0, tasks.length, 1);
   const pct = Math.round((completed / total) * 100);
+
+  async function dismissSetupForever() {
+    setDismissErr("");
+    setDismissBusy(true);
+    try {
+      await apiJson("/v1/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ setup_dismissed: true }),
+      });
+      const m = await apiJson<Me>("/v1/me");
+      setMe(m);
+    } catch {
+      setDismissErr("Could not save. Try again.");
+    } finally {
+      setDismissBusy(false);
+    }
+  }
 
   const fallbackTasks = useMemo(
     () =>
@@ -225,46 +250,64 @@ export function TodayPage() {
         loading={!logsReady}
       />
 
-      <section className="card space-y-3">
-        <div className="flex justify-between text-[10px] uppercase tracking-widest text-muted">
-          <span>Profile setup</span>
-          <span className="text-gold">{pct}%</span>
-        </div>
-        <div className="h-2 rounded-full bg-white/10">
-          <div className="h-full gold-gradient rounded-full transition-all" style={{ width: `${pct}%` }} />
-        </div>
-        {tasks.length > 0 && myId ? (
-          <ul className="space-y-2">
-            {tasks.map((t) => (
-              <li key={t.id}>
-                <Link
-                  to={taskHref(t, myId)}
-                  className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-sm transition-colors ${
-                    t.done
-                      ? "border-emerald-500/30 bg-emerald-500/5 text-muted"
-                      : "border-white/10 bg-night/80 text-white hover:border-gold/25"
-                  }`}
-                >
-                  {taskIcon(t.id)}
-                  <span className={`flex-1 text-left ${t.done ? "line-through" : ""}`}>{t.label}</span>
-                  <span className="text-gold/90 text-xs shrink-0 whitespace-nowrap">
-                    +{t.points} pts
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted">
-            {fallbackTasks != null
-              ? `Legacy progress: ${fallbackTasks} of 5 steps (open Settings to refresh tasks).`
-              : "Loading setup…"}
+      {me && !setupDismissed && (
+        <section className="card space-y-3">
+          <div className="flex justify-between text-[10px] uppercase tracking-widest text-muted">
+            <span>Profile setup</span>
+            <span className="text-gold">{pct}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/10">
+            <div className="h-full gold-gradient rounded-full transition-all" style={{ width: `${pct}%` }} />
+          </div>
+          {tasks.length > 0 && myId ? (
+            <ul className="space-y-2">
+              {tasks.map((t) => (
+                <li key={t.id}>
+                  <Link
+                    to={taskHref(t, myId)}
+                    className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-sm transition-colors ${
+                      t.done
+                        ? "border-emerald-500/30 bg-emerald-500/5 text-muted"
+                        : "border-white/10 bg-night/80 text-white hover:border-gold/25"
+                    }`}
+                  >
+                    {taskIcon(t.id)}
+                    <span className={`flex-1 text-left ${t.done ? "line-through" : ""}`}>{t.label}</span>
+                    <span className="text-gold/90 text-xs shrink-0 whitespace-nowrap">
+                      +{t.points} pts
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted">
+              {fallbackTasks != null
+                ? `Legacy progress: ${fallbackTasks} of 5 steps (open Settings to refresh tasks).`
+                : "Loading setup…"}
+            </p>
+          )}
+          <p className="text-xs text-muted flex items-center gap-1">
+            <span className="text-emerald-400">✓</span> {completed} of {total} complete
           </p>
-        )}
-        <p className="text-xs text-muted flex items-center gap-1">
-          <span className="text-emerald-400">✓</span> {completed} of {total} complete
-        </p>
-      </section>
+          {dismissErr ? <p className="text-sm text-red-400">{dismissErr}</p> : null}
+          <button
+            type="button"
+            disabled={dismissBusy}
+            onClick={() => void dismissSetupForever()}
+            className="w-full text-sm text-muted hover:text-white py-2 rounded-xl border border-white/10 hover:border-white/20 transition-colors disabled:opacity-50"
+          >
+            {dismissBusy ? "Saving…" : "Don’t show this again"}
+          </button>
+          <p className="text-[11px] text-muted text-center">
+            You can bring the checklist back anytime in{" "}
+            <Link to="/settings" className="text-gold underline-offset-2 hover:underline">
+              Settings
+            </Link>
+            .
+          </p>
+        </section>
+      )}
 
       <section className="card space-y-3">
         <h2 className="text-[10px] uppercase tracking-widest text-muted">Mood today</h2>

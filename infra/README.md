@@ -1,5 +1,9 @@
 # MEN-Tool AWS CDK (Python)
 
+**VPS / self-hosted staging:** see [STAGING_VPS.md](./STAGING_VPS.md) (reverse proxy, env vars, DynamoDB, frontend build).
+
+---
+
 ## Bootstrap (once per account/region)
 
 ```bash

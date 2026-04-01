@@ -222,6 +222,7 @@ def build_user_item(
         "setup_bonus_follow": False,
         "setup_bonus_wall": False,
         "setup_bonus_avatar": False,
+        "setup_dismissed": False,
         "membership_days_credited": 0,
         "gsi1_pk": gsi1_pk_email(tenant_id, email_l),
         "gsi1_sk": f"USER#{user_id}",

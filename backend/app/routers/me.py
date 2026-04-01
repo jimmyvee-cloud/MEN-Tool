@@ -28,6 +28,8 @@ def _default_avatar(url: str | None) -> bool:
 
 
 def _setup_progress(tenant_id: str, uid: str, u: dict) -> dict:
+    if u.get("setup_dismissed"):
+        return {"dismissed": True, "tasks": [], "completed": 0, "total": 0}
     tz_done = bool((u.get("timezone") or "").strip())
     follow_done = len(social_repo.list_following(tenant_id, uid)) >= 1
     ref_done = int(u.get("referral_signups", 0) or 0) > 0
@@ -108,6 +110,8 @@ def patch_me(body: ProfilePatch, user: AuthUser = Depends(get_current_user)):
             tz_xp = True
     if body.profile_steps_completed is not None:
         updates["profile_steps_completed"] = body.profile_steps_completed
+    if body.setup_dismissed is not None:
+        updates["setup_dismissed"] = bool(body.setup_dismissed)
     nu = users_repo.update_user_fields(tid, uid, updates)
     if not nu:
         return {}

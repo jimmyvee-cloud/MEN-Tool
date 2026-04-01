@@ -6,8 +6,8 @@ Men's personal performance tracking PWA — React + FastAPI + DynamoDB.
 
 1. Copy `.env.example` to `.env` and adjust if needed.
 2. `docker compose up --build`
-3. API: http://localhost:8001/v1/health
-4. Frontend: http://localhost:5173
+3. API: http://localhost:8818/v1/health
+4. Frontend: http://localhost:5973
 5. The **API container** runs `python -m scripts.ensure_dev_db` on startup (creates the DynamoDB table if needed and seeds the tenant once). If you ever need to re-seed from scratch, reset DynamoDB Local data and restart the API, or run manually: `docker compose exec api python -m scripts.init_db && docker compose exec api python -m scripts.seed`
 
 Default admin (after seed): `admin@mentool.local` / `Admin12345!` (override with `SEED_ADMIN_PASSWORD`).
