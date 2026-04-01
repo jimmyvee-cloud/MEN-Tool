@@ -49,6 +49,8 @@ export function ReliefPresetPage() {
     try {
       const url = new URL(u);
       if (url.hostname.includes("youtu.be")) return url.pathname.replace("/", "").slice(0, 11);
+      const embed = url.pathname.match(/^\/embed\/([^/?]+)/);
+      if (embed?.[1]) return embed[1].slice(0, 11);
       return url.searchParams.get("v");
     } catch {
       return null;

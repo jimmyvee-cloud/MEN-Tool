@@ -97,3 +97,44 @@ class AdminUserPatch(BaseModel):
         if self.tier is None and self.is_active is None:
             raise ValueError("Provide tier and/or is_active")
         return self
+
+
+class AdminGlobalPresetCreate(BaseModel):
+    """Create a tenant-wide preset (admin only)."""
+
+    preset_entity: str = Field(pattern="^(stressor|relief)$")
+    title: str = Field(min_length=1, max_length=200)
+    category: str = Field(min_length=1, max_length=120)
+    duration_seconds: int | None = Field(default=None, ge=0, le=86400)
+    youtube_url: str | None = Field(default=None, max_length=500)
+    description: str | None = Field(default=None, max_length=2000)
+    becomehim_stage: str | None = Field(default=None, max_length=120)
+
+
+class AdminGlobalPresetPatch(BaseModel):
+    """Partial update to a global preset."""
+
+    preset_entity: str | None = Field(default=None, pattern="^(stressor|relief)$")
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    category: str | None = Field(default=None, min_length=1, max_length=120)
+    duration_seconds: int | None = Field(default=None, ge=0, le=86400)
+    youtube_url: str | None = Field(default=None, max_length=500)
+    description: str | None = Field(default=None, max_length=2000)
+    becomehim_stage: str | None = Field(default=None, max_length=120)
+
+    @model_validator(mode="after")
+    def at_least_one_field(self):
+        if all(
+            getattr(self, f) is None
+            for f in (
+                "preset_entity",
+                "title",
+                "category",
+                "duration_seconds",
+                "youtube_url",
+                "description",
+                "becomehim_stage",
+            )
+        ):
+            raise ValueError("Provide at least one field to update")
+        return self

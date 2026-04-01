@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { LOGO_SRC } from "@/lib/branding";
 
-/** Logo + wordmark above login/register — matches splash screen layout */
+/** Logo + wordmark above login/register — same type scale as splash title (splash uses white bg) */
 export function AuthBranding({
   children,
   subtitle,
