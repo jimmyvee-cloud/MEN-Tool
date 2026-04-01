@@ -2,6 +2,9 @@
   "name": "mentool-frontend",
   "private": true,
   "version": "1.0.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "type": "module",
   "scripts": {
     "dev": "node ./node_modules/vite/bin/vite.js",
