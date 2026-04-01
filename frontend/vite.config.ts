@@ -102,6 +102,7 @@ export default defineConfig(({ mode }) => {
       alias: { "@": path.resolve(__dirname, "src") },
     },
     server: {
+      allowedHosts: ["app.men-tool.com"],
       proxy: {
         "/v1": {
           target:
