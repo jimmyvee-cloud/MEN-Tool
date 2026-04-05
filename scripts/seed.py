@@ -116,7 +116,7 @@ def main():
             "Mindvalley 6 Phase",
             "meditation",
             1200,
-            "https://www.youtube.com/embed/oeQfRtiY-ZM?si=4VF7B15sHAsdEHdT",  # Set youtube_url to a watch or youtu.be URL; UI builds /embed/{id} from it.
+            "",  # Set youtube_url to a watch or youtu.be URL; UI builds /embed/{id} from it.
         ),
         ("preset_wimhof", "Wim Hof Breathing", "breathwork", 600, None),
         ("preset_walk", "Brisk Walk", "physical", 900, None),

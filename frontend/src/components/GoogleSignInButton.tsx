@@ -7,6 +7,7 @@ import {
   isLikelyNetworkError,
   setTokens,
 } from "@/lib/api";
+import { safeReturnPath } from "@/lib/safeReturnPath";
 
 declare global {
   interface Window {
@@ -42,8 +43,11 @@ const clientId = (): string =>
  */
 export function GoogleSignInButton({
   inviteCodeRef,
+  returnPath,
 }: {
   inviteCodeRef?: MutableRefObject<string>;
+  /** After sign-in, navigate here if safe (e.g. PWA shortcut target). */
+  returnPath?: string | null;
 }) {
   const nav = useNavigate();
   const divRef = useRef<HTMLDivElement>(null);
@@ -78,7 +82,8 @@ export function GoogleSignInButton({
               }),
             });
             setTokens(data.access_token, data.refresh_token);
-            nav("/", { replace: true });
+            const next = safeReturnPath(returnPath) ?? "/";
+            nav(next, { replace: true });
           } catch (ex) {
             if (isLikelyNetworkError(ex)) {
               const origin = getApiOrigin() || "this origin (Vite /v1 proxy)";
@@ -118,7 +123,7 @@ export function GoogleSignInButton({
       cancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [cid, nav, inviteCodeRef]);
+  }, [cid, nav, inviteCodeRef, returnPath]);
 
   if (!cid) return null;
 

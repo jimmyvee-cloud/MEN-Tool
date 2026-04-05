@@ -73,7 +73,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         devOptions: { enabled: false },
         registerType: "autoUpdate",
-        includeAssets: ["mentool-logo.png", "favicon.svg", "manifest.webmanifest"],
+        includeAssets: ["mentool-logo.png", "favicon.svg", "manifest.json"],
         manifest: false,
         workbox: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],

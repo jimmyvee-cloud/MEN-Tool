@@ -1,12 +1,15 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { apiJson, setTokens } from "@/lib/api";
+import { safeReturnPath } from "@/lib/safeReturnPath";
 import { AuthBranding } from "@/components/AuthBranding";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
 export function RegisterPage() {
   const nav = useNavigate();
   const [params] = useSearchParams();
+  const returnUrl = params.get("returnUrl");
+  const next = safeReturnPath(returnUrl) ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -77,8 +80,15 @@ export function RegisterPage() {
           Register
         </button>
       </form>
-      <GoogleSignInButton inviteCodeRef={inviteRef} />
-      <Link to="/login" className="mt-6 text-gold text-sm">
+      <GoogleSignInButton inviteCodeRef={inviteRef} returnPath={returnUrl} />
+      <Link
+        to={
+          returnUrl
+            ? `/login?returnUrl=${encodeURIComponent(returnUrl)}`
+            : "/login"
+        }
+        className="mt-6 text-gold text-sm"
+      >
         Back to login
       </Link>
     </AuthBranding>

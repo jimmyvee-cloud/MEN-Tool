@@ -3,6 +3,7 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
@@ -66,10 +67,14 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 function Private({ children }: { children: React.ReactNode }) {
   const nav = useNavigate();
+  const loc = useLocation();
   const { access } = getStoredTokens();
   useEffect(() => {
-    if (!access) nav("/login", { replace: true });
-  }, [access, nav]);
+    if (!access) {
+      const returnUrl = encodeURIComponent(loc.pathname + loc.search);
+      nav(`/login?returnUrl=${returnUrl}`, { replace: true });
+    }
+  }, [access, nav, loc.pathname, loc.search]);
   if (!access) return null;
   return <Layout>{children}</Layout>;
 }
