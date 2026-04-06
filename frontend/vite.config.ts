@@ -35,8 +35,8 @@ function readGoogleOAuthClientIdFromDir(dir: string, mode: string): string {
 }
 
 /**
- * In development, never call the browser at localhost:8818 directly — use same-origin /v1 + Vite proxy.
- * Stale .env, Docker, or cached bundles often bake that URL and break login from 127.0.0.1/LAN.
+ * In development, prefer same-origin /v1 + Vite proxy (target: VITE_PROXY_API_TARGET or api.infra-guys.com).
+ * Strip baked localhost:8818 so LAN / multi-host dev still uses the proxy.
  */
 function effectiveViteApiBaseUrl(mode: string, feEnv: Record<string, string>): string {
   const raw = (feEnv.VITE_API_BASE_URL ?? "").trim();
@@ -89,8 +89,9 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/v1": {
           target:
-            process.env.VITE_PROXY_API_TARGET || "http://127.0.0.1:8818",
+            process.env.VITE_PROXY_API_TARGET || "https://api.infra-guys.com",
           changeOrigin: true,
+          secure: true,
         },
       },
     },
